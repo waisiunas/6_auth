@@ -2,6 +2,10 @@
 
 <?php
 session_start();
+
+if (isset($_SESSION['user'])) {
+    header('location: ./dashboard.php');
+}
 $email = "";
 if (isset($_POST['submit'])) {
     $email = htmlspecialchars($_POST['email']);

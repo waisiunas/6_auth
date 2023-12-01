@@ -1,6 +1,11 @@
 <?php require_once './database/connection.php'; ?>
 
 <?php
+session_start();
+if (isset($_SESSION['user'])) {
+    header('location: ./dashboard.php');
+}
+
 $name = $email = "";
 if (isset($_POST['submit'])) {
     $name = htmlspecialchars($_POST['name']);
@@ -17,13 +22,19 @@ if (isset($_POST['submit'])) {
     } elseif ($password !== $password_confirmation) {
         $error = "Your password does not match!";
     } else {
-        $hashed_password = sha1($password);
-        $sql = "INSERT INTO `users`( `name`, `email`, `password`) VALUES ('$name','$email','$hashed_password')";
-        if ($conn->query($sql)) {
-            $success = "Magic has been spelled!";
-            $name = $email = "";
+        $sql = "SELECT * FROM `users` WHERE `email` = '$email'";
+        $result = $conn->query($sql);
+        if ($result->num_rows === 0) {
+            $hashed_password = sha1($password);
+            $sql = "INSERT INTO `users`( `name`, `email`, `password`) VALUES ('$name','$email','$hashed_password')";
+            if ($conn->query($sql)) {
+                $success = "Magic has been spelled!";
+                $name = $email = "";
+            } else {
+                $error = "Magic has failed to spell!";
+            }
         } else {
-            $error = "Magic has failed to spell!";
+            $error = "Email already exists!";
         }
     }
 }
@@ -77,8 +88,8 @@ if (isset($_POST['submit'])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="passsword" class="form-label">Password</label>
-                                <input type="passsword" name="password" id="passsword" placeholder="Enter your passsword!" class="form-control">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" name="password" id="password" placeholder="Enter your passsword!" class="form-control">
                             </div>
 
                             <div class="mb-3">
